@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0e0e16">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Krishna">
+<title>Krishna @ Krishank Industries</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap');
+
+  :root {
+    --bg: #0e0e16;
+    --card: #17172a;
+    --surface: #1f1f35;
+    --border: #2a2a45;
+    --accent: #6c63ff;
+    --accent-light: #9d97ff;
+    --text: #eeeef5;
+    --muted: #7878a0;
+    --user-bg: #251f55;
+    --bot-bg: #17172a;
+    --success: #4ade80;
+    --danger: #f87171;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%; width: 100%;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  .screen { display: none; flex-direction: column; height: 100%; }
+  .screen.active { display: flex; }
+
+  /* ── SETUP SCREEN ── */
+  #setupScreen {
+    background: linear-gradient(160deg, #0e0e16 0%, #151530 100%);
+    overflow-y: auto;
+  }
+
+  .setup-hero {
+    background: linear-gradient(135deg, #1a1a3e, #0e0e20);
+    padding: 52px 24px 36px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+
+  .setup-hero::before {
+    content: '';
+    position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(108,99,255,0.25) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .hero-avatar {
+    width: 76px; height: 76px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border-radius: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px; font-weight: 700; color: white;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 32px rgba(108,99,255,0.45);
+    position: relative; z-index: 1;
+  }
+
+  .setup-hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px; font-weight: 700; color: var(--text);
+    position: relative; z-index: 1;
+  }
+
+  .setup-hero p { font-size: 14px; color: var(--muted); margin-top: 6px; position: relative; z-index: 1; }
+
+  .setup-body { padding: 24px 20px 48px; display: flex; flex-direction: column; gap: 20px; }
+
+  .setup-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+
+  .setup-card-title {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--accent-light);
+  }
+
+  input[type="text"], textarea {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    padding: 13px 15px;
+    outline: none; width: 100%;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: none; height: 160px; line-height: 1.6; font-size: 14px; }
+
+  .api-hint {
+    font-size: 12px; color: var(--muted); line-height: 1.6;
+    padding: 10px 12px;
+    background: rgba(108,99,255,0.08);
+    border-radius: 10px;
+    border-left: 3px solid var(--accent);
+  }
+  .api-hint a { color: var(--accent-light); }
+
+  .start-btn {
+    background: linear-gradient(135deg, var(--accent), #8b85ff);
+    color: white; border: none; border-radius: 14px;
+    padding: 16px; font-family: 'Inter', sans-serif;
+    font-size: 16px; font-weight: 600; cursor: pointer; width: 100%;
+    box-shadow: 0 4px 20px rgba(108,99,255,0.4);
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .start-btn:active { opacity: 0.85; transform: scale(0.98); }
+
+  .error-msg {
+    background: rgba(248,113,113,0.1);
+    border: 1px solid rgba(248,113,113,0.3);
+    border-radius: 10px; padding: 10px 14px;
+    font-size: 13px; color: var(--danger); display: none;
+  }
+
+  /* ── CHAT SCREEN ── */
+  #chatScreen { background: var(--bg); }
+
+  .chat-topbar {
+    padding: 14px 18px;
+    padding-top: max(14px, env(safe-area-inset-top));
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .chat-avatar {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+
+  .chat-info { flex: 1; }
+  .chat-info h2 { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; }
+  .chat-info p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .online-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--success); box-shadow: 0 0 6px var(--success);
+  }
+
+  .settings-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--muted); border-radius: 10px; padding: 7px 12px;
+    font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  .settings-btn:active { opacity: 0.7; }
+
+  .messages {
+    flex: 1; overflow-y: auto; padding: 20px 16px;
+    display: flex; flex-direction: column; gap: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .message { display: flex; gap: 8px; max-width: 88%; animation: pop 0.2s ease; }
+  @keyframes pop { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .message.bot { align-self: flex-start; }
+  .message.user { align-self: flex-end; flex-direction: row-reverse; }
+
+  .m-avatar {
+    width: 30px; height: 30px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+  }
+  .message.bot .m-avatar { background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; }
+  .message.user .m-avatar { background: var(--user-bg); font-size: 15px; }
+
+  .bubble { padding: 11px 14px; border-radius: 16px; font-size: 14px; line-height: 1.6; }
+  .message.bot .bubble { background: var(--bot-bg); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .message.user .bubble { background: var(--user-bg); border-bottom-right-radius: 4px; }
+
+  .typing { display: flex; gap: 5px; padding: 6px 2px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+
+  .input-bar {
+    padding: 12px 14px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0;
+  }
+
+  .input-bar textarea {
+    flex: 1; min-height: 44px; max-height: 100px;
+    border-radius: 14px; padding: 11px 14px;
+    font-size: 15px; line-height: 1.5; resize: none;
+  }
+
+  .send-btn {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent), #8b85ff);
+    border: none; border-radius: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 18px; color: white;
+    box-shadow: 0 2px 12px rgba(108,99,255,0.4);
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .send-btn:active { opacity: 0.8; transform: scale(0.94); }
+  .send-btn:disabled { opacity: 0.3; box-shadow: none; }
+
+  .welcome-bubble { text-align: center; padding: 32px 16px; color: var(--muted); font-size: 14px; }
+  .welcome-bubble .icon { font-size: 48px; margin-bottom: 12px; }
+  .welcome-bubble h3 { font-family:'Space Grotesk',sans-serif; color: var(--text); margin-bottom: 6px; font-size: 18px; }
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setupScreen" class="screen active">
+  <div class="setup-hero">
+    <div class="hero-avatar">@</div>
+    <h1>Krishna</h1>
+    <p>Krishank Industries Assistant</p>
+  </div>
+  <div class="setup-body">
+    <div class="setup-card">
+      <div class="setup-card-title">🔑 Your API Key</div>
+      <input type="text" id="apiKey" placeholder="Paste your Anthropic API key here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+      <div class="api-hint">
+        Get your free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys.<br>Your key is saved only on your device.
+      </div>
+    </div>
+
+    <div class="setup-card">
+      <div class="setup-card-title">🏢 Business Information</div>
+      <textarea id="systemInfo">Business Name: Krishank Industries
+
+Products:
+- Cloth Pieces (various types available)
+
+For pricing, availability, or more details, customers can contact Krishank Industries directly.</textarea>
+      <div class="api-hint">✏️ Add prices, contact number, hours, policies — Krishna will answer from this info only.</div>
+    </div>
+
+    <div id="errorMsg" class="error-msg"></div>
+    <button class="start-btn" onclick="startChat()">Start Chatting with Krishna →</button>
+  </div>
+</div>
+
+<!-- CHAT SCREEN -->
+<div id="chatScreen" class="screen">
+  <div class="chat-topbar">
+    <div class="chat-avatar">@</div>
+    <div class="chat-info">
+      <h2>Krishna</h2>
+      <p>Krishank Industries</p>
+    </div>
+    <div class="online-dot"></div>
+    <button class="settings-btn" onclick="goBack()">⚙ Edit</button>
+  </div>
+
+  <div class="messages" id="messages"></div>
+
+  <div class="input-bar">
+    <textarea id="userInput" placeholder="Ask something..." rows="1"
+      onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<script>
+  let apiKey = '', systemInfo = '', history = [], isLoading = false;
+
+  // Remember API key using localStorage
+  window.onload = function() {
+    const saved = localStorage.getItem('krishna_apikey');
+    if (saved) document.getElementById('apiKey').value = saved;
+  };
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function startChat() {
+    const key = document.getElementById('apiKey').value.trim();
+    const info = document.getElementById('systemInfo').value.trim();
+    const err = document.getElementById('errorMsg');
+
+    if (!key) { err.style.display='block'; err.textContent='Please enter your API key.'; return; }
+    if (!info) { err.style.display='block'; err.textContent='Please keep business info in the box.'; return; }
+
+    err.style.display = 'none';
+    apiKey = key; systemInfo = info; history = [];
+
+    // Save key so user doesn't have to paste again next time
+    localStorage.setItem('krishna_apikey', key);
+
+    show('chatScreen');
+    document.getElementById('messages').innerHTML = '';
+    addBotMessage('Namaste! 🙏 I\'m <strong>Krishna @</strong>, your assistant for <strong>Krishank Industries</strong>. How can I help you today?');
+  }
+
+  function goBack() { show('setupScreen'); }
+
+  function addBotMessage(html) {
+    const msgs = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'message bot';
+    div.innerHTML = `<div class="m-avatar">@</div><div class="bubble">${html}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function addUserMessage(text) {
+    const msgs = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'message user';
+    div.innerHTML = `<div class="m-avatar">🧑</div><div class="bubble">${esc(text)}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showTyping() {
+    const msgs = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'message bot'; div.id = 'typing';
+    div.innerHTML = `<div class="m-avatar">@</div><div class="bubble"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+    msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function removeTyping() { const t=document.getElementById('typing'); if(t) t.remove(); }
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  function fmt(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g,'<em>$1</em>')
+      .replace(/\n/g,'<br>');
+  }
+
+  async function sendMessage() {
+    if (isLoading) return;
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = ''; input.style.height = 'auto';
+    addUserMessage(text);
+    history.push({ role: 'user', content: text });
+
+    isLoading = true;
+    document.getElementById('sendBtn').disabled = true;
+    showTyping();
+
+    const prompt = `You are Krishna (@), a friendly and professional customer assistant for Krishank Industries. Answer ONLY based on the knowledge base below. If asked something not in the knowledge base, politely say you don't have that information and suggest contacting Krishank Industries directly.
+
+=== KNOWLEDGE BASE ===
+${systemInfo}
+=== END ===
+
+Rules:
+- Be warm, polite, and professional
+- Answer only from the knowledge base
+- Never make up details not provided
+- If unsure: "Please contact Krishank Industries directly for more details."`;
+
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-calls': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          system: prompt,
+          messages: history
+        })
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error?.message || 'API error');
+
+      const reply = data.content[0].text;
+      history.push({ role: 'assistant', content: reply });
+      removeTyping();
+      addBotMessage(fmt(reply));
+
+    } catch(err) {
+      removeTyping();
+      addBotMessage(`⚠️ <strong>Error:</strong> ${esc(err.message)}<br><small>Check your API key and internet connection.</small>`);
+    }
+
+    isLoading = false;
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('userInput').focus();
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  }
+</script>
+</body>
+</html>
